@@ -1,5 +1,4 @@
 streamlit
+agno
 groq
-yfinance
-plotly
-duckduckgo-search
+duckduckgo_search
