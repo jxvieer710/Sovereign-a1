@@ -1,33 +1,28 @@
 import streamlit as st
-from agno.agent import Agent
-from agno.models.ollama import Ollama
-from agno.tools.duckduckgo import DuckDuckGoTools
-from agno.knowledge.knowledge import Knowledge
-from agno.vectordb.lancedb import LanceDb
-from agno.knowledge.embedder.ollama import OllamaEmbedder
 
-st.set_page_config(page_title="Sovereign Sports", page_icon="🏈", layout="centered")
-st.header("🏈 Sports Assassin")
+# 1. THE NAVIGATION (The Hallway)
+# This defines the "doors" in your sidebar
+pg = st.navigation([
+    st.Page("app_sports.py", title="Vegas Sniper", icon="🎯", default=True),
+    st.Page("app_trading.py", title="Trading Sniper", icon="📈")
+])
 
-# Load Sports Memory
-embedder = OllamaEmbedder(id="nomic-embed-text", dimensions=768)
-knowledge = Knowledge(vector_db=LanceDb(uri="tmp/lancedb_sports", table_name="sports_memory", embedder=embedder))
+# 2. GLOBAL CONFIG (The Roof)
+# This title and icon appear in your browser tab for every page
+st.set_page_config(page_title="Sovereign AI", page_icon="🎯", layout="wide")
 
-agent = Agent(
-    model=Ollama(id="llama3.2:3b"),
-    tools=[DuckDuckGoTools()],
-    knowledge=knowledge,
-    add_knowledge_to_context=True,
-    description="You are a Ruthless Sports Handicapper. Focus on Props, EV+, and Injury impacts."
-)
+# 3. RUN THE SELECTED PAGE
+# This executes the specific code for whichever page is currently selected
+pg.run()
 
-if "messages" not in st.session_state: st.session_state.messages = []
-for msg in st.session_state.messages: st.chat_message(msg["role"]).markdown(msg["content"])
+# --- CONTENT FOR VEGAS SNIPER ---
+# This code only runs when "Vegas Sniper" is selected in the menu
+st.title("🎯 Vegas Sniper Master")
+st.info("January 2026 Sports Intelligence Protocol Active.")
 
-if prompt := st.chat_input("Check Player Prop..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").markdown(prompt)
-    with st.chat_message("assistant"):
-        response = agent.run(prompt).content
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+# Safely check for your Groq Key in Streamlit Secrets
+if "GROQ_API_KEY" in st.secrets:
+    st.success("System Status: Online")
+    # Your Vegas Sniper logic goes here...
+else:
+    st.error("Missing Key! Go to Streamlit Settings > Secrets and add GROQ_API_KEY.")
