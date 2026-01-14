@@ -1,22 +1,10 @@
 import streamlit as st
 from agno.agent import Agent
-from agno.models.ollama import Ollama
+from agno.models.groq import Groq
 
-st.set_page_config(page_title="Sovereign Strategy", page_icon="🧠", layout="centered")
-st.header("🧠 Strategy Translator")
-
-agent = Agent(
-    model=Ollama(id="llama3.2:3b"),
-    description="You convert raw user thoughts into high-precision technical commands."
-)
-
-if "messages" not in st.session_state: st.session_state.messages = []
-for msg in st.session_state.messages: st.chat_message(msg["role"]).markdown(msg["content"])
-
-if prompt := st.chat_input("Your Rough Idea..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").markdown(prompt)
-    with st.chat_message("assistant"):
-        response = agent.run(prompt).content
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+st.title("🪄 Prompt Master")
+if "GROQ_API_KEY" in st.secrets:
+    agent = Agent(model=Groq(id="llama-3.3-70b-versatile", api_key=st.secrets["GROQ_API_KEY"]))
+    prompt = st.text_area("Paste your rough prompt here:")
+    if st.button("💎 OPTIMIZE"):
+        st.markdown(agent.run(f"Rewrite this into a world-class AI prompt: {prompt}").content)

@@ -1,28 +1,24 @@
 import streamlit as st
+from agno.agent import Agent
+from agno.models.groq import Groq
+from agno.tools.duckduckgo import DuckDuckGoTools
 
-# 1. THE NAVIGATION (The Hallway)
-# This defines the "doors" in your sidebar
-pg = st.navigation([
-    st.Page("app_sports.py", title="Vegas Sniper", icon="🎯", default=True),
-    st.Page("app_trading.py", title="Trading Sniper", icon="📈")
-])
+st.title("🎯 Vegas Sniper")
+st.write("Real-time 2026 Sports Intelligence")
 
-# 2. GLOBAL CONFIG (The Roof)
-# This title and icon appear in your browser tab for every page
-st.set_page_config(page_title="Sovereign AI", page_icon="🎯", layout="wide")
-
-# 3. RUN THE SELECTED PAGE
-# This executes the specific code for whichever page is currently selected
-pg.run()
-
-# --- CONTENT FOR VEGAS SNIPER ---
-# This code only runs when "Vegas Sniper" is selected in the menu
-st.title("🎯 Vegas Sniper Master")
-st.info("January 2026 Sports Intelligence Protocol Active.")
-
-# Safely check for your Groq Key in Streamlit Secrets
 if "GROQ_API_KEY" in st.secrets:
-    st.success("System Status: Online")
-    # Your Vegas Sniper logic goes here...
-else:
-    st.error("Missing Key! Go to Streamlit Settings > Secrets and add GROQ_API_KEY.")
+    agent = Agent(
+        model=Groq(id="llama-3.3-70b-versatile", api_key=st.secrets["GROQ_API_KEY"]),
+        tools=[DuckDuckGoTools()],
+        instructions=[
+            "Today's date is January 14, 2026.",
+            "Search for current NFL/NBA schedules for Jan 2026.",
+            "Provide [OVER/UNDER] signals based on 2026 injury reports."
+        ],
+        markdown=True
+    )
+    query = st.text_input("Enter Player or Team (e.g. 'Lions vs Rams 2026'):")
+    if st.button("🚀 EXECUTE SCAN"):
+        with st.spinner("Searching 2026 Web Data..."):
+            st.markdown(agent.run(query).content)
+else: st.error("Add GROQ_API_KEY to Secrets")

@@ -1,7 +1,7 @@
 streamlit
 agno
-ollama
 groq
 duckduckgo-search
 ddgs
 lancedb
+ollama
